@@ -39,8 +39,8 @@ class ConfigCNN:
             'common_params': {
                 'batch_size': {
                     'train': 24,
-                    'valid': 128,
-                    'test': 128
+                    'valid': 24,
+                    'test': 24
                 },
                 'num_workers': 8,
                 'shuffle': True,

@@ -30,7 +30,9 @@ def metrics_computation(predictions, labels):
     #   for sarcasm: f1_sarc = 2 * precision_sarc * recall_sarc / (precision_sarc + recall_sarc)
     #   for not sarcasm: f1_notsarc = 2 * precision_notsarc * recall_notsarc / (precision_notsarc + recall_notsarc)
     predict_labels, true_labels = np.argmax(predictions, 1),  np.squeeze(labels)
-    metric_results = classification_report(true_labels, predict_labels, target_names=[0, 1], output_dict=True)
+    metric_results = classification_report(
+        true_labels, predict_labels, target_names=['class 0', 'class 1'], labels=[0, 1], output_dict=True
+    )
     # accuracy, weight_accuracy = metric_results['accuracy'], metric_results['weighted avg']
     return metric_results
 
@@ -41,7 +43,7 @@ class Train:
         self.output_classes = output_classes
         self.height, self.width = input_length, input_dimensions
         self.network = net
-        self.log_path, self.model_save_path = log_path, model_path
+        self.log_path, self.model_save_path = log_path + model_name, model_path
         self.devices = devices
 
         self.criterion = nn.CrossEntropyLoss()  # input need to be set into (N, C)
@@ -68,7 +70,6 @@ class Train:
         :param patience: 早停
         :return: 训练结果
         """
-        global scheduler_step
         optimizer = optim.Adam(parameters, lr=learning_rate, weight_decay=weight_decay)
         if scheduler is not None:
             scheduler_step = methodcaller(scheduler)(optimizer, mode='max', factor=0.1, verbose=True, patience=patience)
@@ -90,12 +91,9 @@ class Train:
 
                     # loss输出，每个epoch输出一次
                     running_loss += loss.item()
-                    running_accuracy += metrics_computation(
-                        outputs.cpu().detach().numpy(), labels.cpu().detach().numpy()
-                    )['accuracy']
 
             train_loss.append(running_loss / len(dataloader['train']))
-            train_accuracy.append(running_accuracy / len(dataloader['train']))
+            train_accuracy.append(self.test(dataloader['train'])[1])
             print(
                 "TRAIN - (model: %s) (difference: %d/epochs: %d)>> loss: %.4f accuracy: %.4f"
                 % (self.model_name, epochs - best_epoch, epochs, train_loss[-1], train_accuracy[-1])
@@ -121,38 +119,32 @@ class Train:
             if epochs - best_epoch >= self.early_stop:
                 return
 
-    def test(self, dataloader):
+    def test(self, dataloader, network=None):
         """
         测试过程
         :param dataloader: 预测结果
+        :param network: 网络，默认为空
         :return: 返回测试结果
         """
-        self.network.eval()
+        if network is None:
+            network = self.network
+        else:
+            pass
         test_loss, test_accuracy, results = 0.0, 0.0, None
+        predictions, true_labels = [], []
         with torch.no_grad():
             with tqdm(dataloader) as td:
                 for batch_data in td:
                     texts, labels = self.data_preparation(batch_data)
-                    outputs = self.network(texts)
+                    outputs = network(texts)
                     test_loss += self.loss_computation(outputs, labels).item()
-                    result_accuracy = metrics_computation(
-                        outputs.cpu().detach().numpy(), labels.cpu().detach().numpy()
-                    )
-                    if results is None:
-                        results = result_accuracy
-                    else:
-                        for key, value in result_accuracy.items():
-                            if type(value) is dict:
-                                for sub_key, sub_value in value.items():
-                                    results[key][sub_key] += sub_value
-                            else:
-                                results[key] += value
-            for key, value in results.items():
-                if type(value) is dict:
-                    for sub_key, sub_value in value.items():
-                        results[key][sub_key] /= len(dataloader)
-                else:
-                    results[key] /= len(dataloader)
+                    predictions.append(outputs.cpu().detach().numpy())
+                    true_labels.append(labels.cpu().detach().numpy())
+
+                results = metrics_computation(
+                    np.concatenate(np.array(predictions), axis=0),
+                    np.concatenate(np.array(true_labels), axis=0)
+                )
             test_loss = test_loss / len(dataloader)
         return test_loss, results['accuracy'], results
 
