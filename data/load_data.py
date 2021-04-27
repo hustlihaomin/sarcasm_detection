@@ -4,6 +4,8 @@ import pandas as pd
 import torch
 
 from torch.utils.data import Dataset, DataLoader
+from transformers import BertTokenizer, BertModel
+
 from data.split import split_train_valid_test
 
 origin_path = "/home/data/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/"
@@ -17,6 +19,25 @@ feature_path = {
     'HYP': origin_path + 'sarcasm_v2/HYP-sarc-notsarc-feature.npy',
     'RQ': origin_path + 'sarcasm_v2/RQ-sarc-notsarc-feature.npy'
 }
+pretrained_path = {
+    'chinese_bert_base': '/home/zhuchuanbo/tools/pretrained_models/models/chinese_bert_base_L-12_H-768_A-12',
+    'chinese_bert_wwn_ext': '/home/zhuchuanbo/tools/pretrained_models/models/chinese_wwm_ext_L-12_H-768_A-12'
+}
+
+
+def get_text_embedding(text):
+    tokenizer_class = BertTokenizer
+    model_class = BertModel
+    # directory is fine
+    # pretrained_weights = '/home/sharing/disk3/pretrained_embedding/Chinese/bert/pytorch'
+    pretrained_weights = pretrained_path['chinese_bert_base']
+    tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
+    bert_model = model_class.from_pretrained(pretrained_weights)
+    # add_special_tokens will add start and end token
+    input_ids = torch.tensor([tokenizer.encode(text, add_special_tokens=False)])
+    with torch.no_grad():
+        last_hidden_states = bert_model(input_ids)[0]  # Models outputs are now tuples
+    return last_hidden_states.squeeze().numpy()
 
 
 class SarcasmDataset(Dataset):
@@ -25,6 +46,7 @@ class SarcasmDataset(Dataset):
         self.mode = mode
         self.time_length, self.input_dimensions = 0, 0
         if need_padding:
+            self.padding = get_text_embedding('[PAD]')
             self._init_sarcasm_corpus_v2()
         else:
             self._load_sarcasm_corpus()
@@ -47,8 +69,8 @@ class SarcasmDataset(Dataset):
         # 统一时间步长度，不足的补零，遵循 3 sigma原则
         for i in range(len(self.features)):
             if self.features[i].shape[0] < self.time_length:
-                paddings = np.zeros((self.time_length - self.features[i].shape[0], 768), )
-                self.features[i] = np.concatenate((self.features[i], paddings), axis=0)
+                paddings = np.tile(self.padding, (self.time_length - self.features[i].shape[0], 1))
+                self.features[i] = np.concatenate((paddings, self.features[i]), axis=0)
             elif self.features[i].shape[0] > self.time_length:
                 self.features[i] = self.features[i][0:self.time_length][:]
             else:
@@ -101,9 +123,9 @@ def sarcasm_dataloader(params):
 # print(data)
 if __name__ == '__main__':
     model = SarcasmDataset(
-        dataset='GEN',
+        dataset='RQ',
         mode='train',
-        need_padding=False
+        need_padding=True
     )
     features = model.get_data()
     print(features.shape)

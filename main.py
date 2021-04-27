@@ -12,7 +12,11 @@ import torch
 from config.CNN_config import ConfigCNN
 from data.load_data import sarcasm_dataloader
 from models import CNNModule
+from models.DNN import DNNModule
+from models.textCNN import TextCNNModule
 from train.cnn import CNNTrain
+from train.dnn import DNNTrain
+from train.textcnn import TextCNNTrain
 
 
 def setup_seed():
@@ -36,7 +40,7 @@ def parse_args():
     parser.add_argument(
         '--data_path', type=str, default='/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
     )
-    parser.add_argument('--gpu_ids', type=list, default=[0])
+    parser.add_argument('--gpu_ids', type=list, default=[1])
     return parser.parse_args()
 
 
@@ -71,13 +75,12 @@ def init_model(params):
             dataloader, network.parameters(), None,
             params.learning_rate, params.weight_decay, params.patience
         )
-    else:
-        pretrained_path = os.path.join(params.model_path, f'{params.model_name}-{params.dataset}.pth')
-        assert os.path.exists(pretrained_path)
-        network.load_state_dict(torch.load(pretrained_path))
-        network.to(device=params.devices)
-
-    _, _, results = train.do_test(dataloader['test'])
+    pretrained_path = os.path.join(params.model_path, f'{params.model_name}-{params.dataset}.pth')
+    print(pretrained_path)
+    assert os.path.exists(pretrained_path)
+    network.load_state_dict(torch.load(pretrained_path))
+    network.to(device=params.devices)
+    _, _, results = train.do_test(dataloader['test'], network)
     print(results)
 
 
