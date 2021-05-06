@@ -13,21 +13,26 @@ class LSTMAttentionModule(nn.Module):
         self.dropout = nn.Dropout(0.2)
         self.fc = nn.Linear(self.hidden_dim * 2, self.output_classes)
 
-    # lstm_output : [batch_size, n_step, n_hidden * num_directions(=2)], F matrix
-    def attentino_net(self, lstm_output, final_state):
-        hidden = final_state.view(-1, self.hidden_dim * 2,
-                                  1)  # hidden:[batch_size, n_hidden * num_directions(=2), 1(=n_layer)]
-        attn_weights = torch.bmm(lstm_output, hidden).squeeze(2)  # attn_weights:[batch_size, n_step]
-        soft_attn_weights = F.softmax(attn_weights, 1)
-        # [batch_size, n_hidden * num_directions(=2), n_step] * [batch_size, n_step, 1] =
-        # [batch_size, n_hidden *num_directions(=2), 1]
-        context = torch.bmm(lstm_output.transpose(1, 2), soft_attn_weights.unsqueeze(2)).squeeze(2)
-        return context, soft_attn_weights.data.numpy()  # context : [batch_size, n_hidden * num_directions(=2)]
+        self.w_omega = nn.Parameter(torch.Tensor(self.hidden_dim*2,self.hidden_dim*2))
+        self.u_omega = nn.Parameter(torch.Tensor(self.hidden_dim*2,1))
+
+        nn.init.uniform_(self.w_omega,-0.1,0.1)
+        nn.init.uniform_(self.u_omega,-0.1,0.1)
+
+    # lstm_output : [batch_size, seq_len, n_hidden * num_directions(=2)], F matrix
+    def attentino_net(self, lstm_output):
+        u = torch.tanh(torch.matmul(lstm_output,self.w_omega))#(batch,seq_len,hidden_dim*2)
+        att = torch.matmul(u,self.u_omega) #[batch,seq_len,1]
+        att_score = F.softmax(att,dim=1)
+
+        scored_x = lstm_output *att_score #[batch,seq_len,hidden_dim*2]
+
+        context = torch.sum(scored_x,dim=1)#[batch,hidden_dim*2]
+        return context
 
     def forward(self, x):
-        # hidden_last, cn_last : [num_layers(=1) * num_directions(=2), batch_size, n_hidden]
-        x, (hidden_last, cn_last) = self.bilstm(x)
-        x = x.permute(1, 0, 2)
-        attn_output, attention = self.attentino_net(x, hidden_last)
+        x, (hidden_last, cn_last) = self.bilstm(x) # hidden_last, cn_last : [num_layers(=1) * num_directions(=2), batch_size, hidden_dim]
+        # x = x.permute(1, 0, 2)
+        attn_output = self.attentino_net(x)
         out = self.fc(attn_output)  # model : [batch_size, num_classes], attention : [batch_size, n_step]
         return out
