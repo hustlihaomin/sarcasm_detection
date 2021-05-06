@@ -12,16 +12,20 @@ origin_path = "/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resour
 feature_file = {
     'GEN': origin_path + 'sarcasm_v2/GEN-sarc-notsarc-feature.csv',
     'HYP': origin_path + 'sarcasm_v2/HYP-sarc-notsarc-feature.csv',
-    'RQ': origin_path + 'sarcasm_v2/RQ-sarc-notsarc-feature.csv'
+    'RQ': origin_path + 'sarcasm_v2/RQ-sarc-notsarc-feature.csv',
+    'twitter': origin_path + 'twitter_with_emoji/twitter-with-emoji-feature.csv'
 }
 feature_path = {
     'GEN': origin_path + 'sarcasm_v2/GEN-sarc-notsarc-feature.npy',
     'HYP': origin_path + 'sarcasm_v2/HYP-sarc-notsarc-feature.npy',
-    'RQ': origin_path + 'sarcasm_v2/RQ-sarc-notsarc-feature.npy'
+    'RQ': origin_path + 'sarcasm_v2/RQ-sarc-notsarc-feature.npy',
+    'twitter': origin_path + 'twitter_with_emoji/twitter-with-emoji-feature.npy'
 }
+
 pretrained_path = {
     'chinese_bert_base': '/home/zhuchuanbo/tools/pretrained_models/models/chinese_bert_base_L-12_H-768_A-12',
-    'chinese_bert_wwn_ext': '/home/zhuchuanbo/tools/pretrained_models/models/chinese_wwm_ext_L-12_H-768_A-12'
+    'chinese_bert_wwn_ext': '/home/zhuchuanbo/tools/pretrained_models/models/chinese_wwm_ext_L-12_H-768_A-12',
+    'bert-base-uncased': 'bert-base-uncased'
 }
 
 
@@ -30,7 +34,7 @@ def get_text_embedding(text):
     model_class = BertModel
     # directory is fine
     # pretrained_weights = '/home/sharing/disk3/pretrained_embedding/Chinese/bert/pytorch'
-    pretrained_weights = pretrained_path['chinese_bert_base']
+    pretrained_weights = pretrained_path['bert-base-uncased']
     tokenizer = tokenizer_class.from_pretrained(pretrained_weights)
     bert_model = model_class.from_pretrained(pretrained_weights)
     # add_special_tokens will add start and end token
@@ -125,8 +129,13 @@ def sarcasm_dataloader(params):
 
 # print(data)
 if __name__ == '__main__':
+    # model = SarcasmDataset(
+    #     dataset='RQ',
+    #     mode='train',
+    #     need_padding=True
+    # )
     model = SarcasmDataset(
-        dataset='RQ',
+        dataset='twitter',
         mode='train',
         need_padding=False
     )

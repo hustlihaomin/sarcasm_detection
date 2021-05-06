@@ -37,8 +37,8 @@ def setup_seed():
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', type=bool, default=True)
-    parser.add_argument('--dataset', type=str, default='GEN')
-    parser.add_argument('--model_name', type=str, default='LSTMAttention')
+    parser.add_argument('--dataset', type=str, default='twitter')
+    parser.add_argument('--model_name', type=str, default='CNN')
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--early_stop', type=bool, default=True)
     parser.add_argument('--shuffle', type=bool, default=True)
