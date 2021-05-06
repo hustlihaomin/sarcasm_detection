@@ -21,7 +21,7 @@ class DNNModule(nn.Module, ABC):
         self.fc6 = nn.Linear(32,16)
         self.fc7 = nn.Linear(16,8)
         self.fc8 = nn.Linear(8,2)
-        self.fc = nn.Linear(256,2)
+        self.fc = nn.Linear(128,2)
         # TODO 添加position embedding，防止全部为0
 
         self.bn1 = nn.BatchNorm1d(512)
@@ -35,8 +35,12 @@ class DNNModule(nn.Module, ABC):
         x = x[:, -1, :]
         # TODO 64 * 1 * 1 需要改成相对应的输出
         # x = x.view(x.size(0), -1)
-        x = self.bn1(F.relu(self.fc1(x)))
-        x = self.bn2(F.relu(self.fc2(x)))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+
+        x = self.fc(x)
+        return x
         # x = self.bn3(F.relu(self.fc3(x)))
         # x = self.bn4(F.relu(self.fc4(x)))
         # x = self.bn5(F.relu(self.fc5(x)))
@@ -44,5 +48,3 @@ class DNNModule(nn.Module, ABC):
         # x = self.bn7(F.relu(self.fc7(x)))
         # x = self.dropout(F.relu(self.fc8(x)))
         # x = self.softmax(x)
-        x = self.dropout(self.fc(x))
-        return x

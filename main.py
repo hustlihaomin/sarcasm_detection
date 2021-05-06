@@ -19,12 +19,15 @@ from models.textCNN import TextCNNModule
 from models.LSTM import LSTMModule
 from models.CNN_LSTM import CNNLSTMModule
 from models.LSTM_Attention import LSTMAttentionModule
+from models.CNN_LSTM_Attention import CNNLSTMAttentionModule
 from train.cnn import CNNTrain
 from train.dnn import DNNTrain
 from train.textcnn import TextCNNTrain
 from train.lstm import LSTMTrain
 from train.cnnlstm import CNNLSTMTrain
 from train.lstmattention import LSTMAttentionTrain
+from train.cnnlstmattention import CNNLSTMAttentionTrain
+
 
 def setup_seed():
     torch.manual_seed(1)
@@ -37,8 +40,8 @@ def setup_seed():
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', type=bool, default=True)
-    parser.add_argument('--dataset', type=str, default='GEN')
-    parser.add_argument('--model_name', type=str, default='LSTMAttention')
+    parser.add_argument('--dataset', type=str, default='HYP')
+    parser.add_argument('--model_name', type=str, default='DNN')
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--early_stop', type=bool, default=True)
     parser.add_argument('--shuffle', type=bool, default=True)
@@ -56,7 +59,7 @@ def init_model(params):
     print("Use %d GPUs!" % len(params.gpu_ids))
     params.devices = torch.device('cuda:%d' % params.gpu_ids[0] if using_cuda else 'cpu')
     dataloader = sarcasm_dataloader(params)
-    network = LSTMAttentionModule(
+    network = DNNModule(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -68,7 +71,7 @@ def init_model(params):
             network, device_ids=params.gpu_ids, output_device=params.gpu_ids[0]
         )
 
-    train = LSTMAttentionTrain(
+    train = DNNTrain(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -100,7 +103,7 @@ def print_hi(name):
 if __name__ == '__main__':
     print_hi('PyCharm')
     setup_seed()
-    config = ConfigLSTM(parse_args())
+    config = ConfigDNN(parse_args())
     init_model(config.get_config())
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
