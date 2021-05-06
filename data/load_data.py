@@ -8,7 +8,7 @@ from transformers import BertTokenizer, BertModel
 
 from data.split import split_train_valid_test
 
-origin_path = "/home/data/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/"
+origin_path = "/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/"
 feature_file = {
     'GEN': origin_path + 'sarcasm_v2/GEN-sarc-notsarc-feature.csv',
     'HYP': origin_path + 'sarcasm_v2/HYP-sarc-notsarc-feature.csv',
@@ -107,15 +107,18 @@ def sarcasm_dataloader(params):
     return {
         "train": DataLoader(
             datasets['train'], batch_size=params.batch_size['train'], num_workers=params.num_workers,
-            shuffle=params.shuffle
+            shuffle=params.shuffle,
+            drop_last=True
         ),
         "valid": DataLoader(
             datasets['valid'], batch_size=params.batch_size['valid'], num_workers=params.num_workers,
-            shuffle=params.shuffle
+            shuffle=params.shuffle,
+            drop_last=True
         ),
         "test": DataLoader(
             datasets['test'], batch_size=params.batch_size['test'], num_workers=params.num_workers,
-            shuffle=params.shuffle
+            shuffle=params.shuffle,
+            drop_last=True
         ),
     }
 
@@ -125,7 +128,7 @@ if __name__ == '__main__':
     model = SarcasmDataset(
         dataset='RQ',
         mode='train',
-        need_padding=True
+        need_padding=False
     )
     features = model.get_data()
     print(features.shape)

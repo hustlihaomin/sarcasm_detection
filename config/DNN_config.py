@@ -5,7 +5,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from config.storge import Storage
 
 
-class ConfigCNN:
+class ConfigDNN:
     def __init__(self, args):
         # 设置数据所在目录
         self.data_path = args.data_path
@@ -35,7 +35,7 @@ class ConfigCNN:
         }
 
     @staticmethod
-    def __cnn_config_params():
+    def __dnn_config_params():
         return {
             'common_params': {
                 'batch_size': {
@@ -79,7 +79,7 @@ class ConfigCNN:
         # integrate all parameters
         return Storage(dict(
             self.global_params,
-            **self.__cnn_config_params()['dataset_params'][dataset_name],
-            **self.__cnn_config_params()['common_params'],
+            **self.__dnn_config_params()['dataset_params'][dataset_name],
+            **self.__dnn_config_params()['common_params'],
             **self.__dataset_common_params()[dataset_name]
         ))
