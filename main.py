@@ -30,13 +30,13 @@ def setup_seed():
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', type=bool, default=True)
-    parser.add_argument('--dataset', type=str, default='GEN')
+    parser.add_argument('--dataset', type=str, default='twitter')
     parser.add_argument('--model_name', type=str, default='CNN')
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--early_stop', type=bool, default=True)
     parser.add_argument('--shuffle', type=bool, default=True)
-    parser.add_argument('--model_path', type=str, default='/home/zhuchuanbo/paper_code/SarcasmDetection/model_path/')
-    parser.add_argument('--log_path', type=str, default='/home/zhuchuanbo/paper_code/SarcasmDetection/log_path/')
+    parser.add_argument('--model_path', type=str, default='./model_path/')
+    parser.add_argument('--log_path', type=str, default='./log_path/')
     parser.add_argument(
         '--data_path', type=str, default='/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
     )

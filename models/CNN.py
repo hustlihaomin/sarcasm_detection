@@ -23,7 +23,7 @@ class CNNModule(nn.Module, ABC):
         # TODO 64 * 1 * 1 需要改成相对应的输出
         # for GEN, is 64 * 11 * 41
         # for HYP, is 64 * 13 * 41
-        self.fc1 = nn.Linear(64 * 11 * 41, 1024)
+        self.fc1 = nn.Linear(64*3*41, 1024)
         self.fc2 = nn.Linear(1024, 512)
         self.fc3 = nn.Linear(512, 128)
         self.fc4 = nn.Linear(128, 2)
@@ -42,11 +42,14 @@ class CNNModule(nn.Module, ABC):
         x = self.pool4(F.relu(self.conv4(x)))
 
         # TODO 64 * 1 * 1 需要改成相对应的输出
-        x = x.view(-1, 64 * 11 * 41)
+        x = x.view(-1, 64*3*41)
         # x = x.view(x.size(0), -1)
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn2(self.fc2(x)))
         x = F.relu(self.bn3(self.fc3(x)))
+        # x = F.relu((self.fc1(x)))
+        # x = F.relu((self.fc2(x)))
+        # x = F.relu((self.fc3(x)))
         x = self.fc4(x)
         # x = self.softmax(x)
         return x
