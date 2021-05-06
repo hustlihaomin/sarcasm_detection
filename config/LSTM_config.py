@@ -1,11 +1,10 @@
 import os
 import random
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from config.storge import Storage
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-
-class ConfigCNN:
+class ConfigLSTM:
     def __init__(self, args):
         # 设置数据所在目录
         self.data_path = args.data_path
@@ -35,7 +34,7 @@ class ConfigCNN:
         }
 
     @staticmethod
-    def __cnn_config_params():
+    def __lstm_config_params():
         return {
             'common_params': {
                 'batch_size': {
@@ -51,21 +50,21 @@ class ConfigCNN:
             'dataset_params': {
                 'gen': {
                     'learning_rate': random.choice([5e-3, 1e-3, 1e-4]),
-                    'scheduler': ReduceLROnPlateau,
+                    'scheduler': ReduceLROnPlateau,#ReduceLROnPlateau
                     'weight_decay': 1e-2,
                     'patience': 10,
                     'early_stop': 20,
                 },
                 'hyp': {
                     'learning_rate': random.choice([5e-3, 1e-3, 1e-4]),
-                    'scheduler': ReduceLROnPlateau,
+                    'scheduler': ReduceLROnPlateau,#ReduceLROnPlateau
                     'weight_decay': 1e-2,
                     'patience': 10,
                     'early_stop': 20,
                 },
                 'rq': {
                     'learning_rate': random.choice([5e-3, 1e-3, 1e-4]),
-                    'scheduler': ReduceLROnPlateau,
+                    'scheduler': ReduceLROnPlateau,#ReduceLROnPlateau
                     'weight_decay': 1e-2,
                     'patience': 10,
                     'early_stop': 20,
@@ -79,7 +78,7 @@ class ConfigCNN:
         # integrate all parameters
         return Storage(dict(
             self.global_params,
-            **self.__cnn_config_params()['dataset_params'][dataset_name],
-            **self.__cnn_config_params()['common_params'],
+            **self.__lstm_config_params()['dataset_params'][dataset_name],
+            **self.__lstm_config_params()['common_params'],
             **self.__dataset_common_params()[dataset_name]
         ))
