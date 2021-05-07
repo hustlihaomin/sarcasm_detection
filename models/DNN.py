@@ -21,7 +21,7 @@ class DNNModule(nn.Module, ABC):
         self.fc6 = nn.Linear(32,16)
         self.fc7 = nn.Linear(16,8)
         self.fc8 = nn.Linear(8,2)
-        self.fc = nn.Linear(128,2)
+        self.fc = nn.Linear(8,2)
         # TODO 添加position embedding，防止全部为0
 
         self.bn1 = nn.BatchNorm1d(512)
@@ -31,20 +31,17 @@ class DNNModule(nn.Module, ABC):
         self.bn5 = nn.BatchNorm1d(32)
         self.bn6 = nn.BatchNorm1d(16)
         self.bn7 = nn.BatchNorm1d(8)
+
     def forward(self, x):
         x = x[:, -1, :]
         # TODO 64 * 1 * 1 需要改成相对应的输出
         # x = x.view(x.size(0), -1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-
-        x = self.fc(x)
+        x = F.relu(self.bn1(self.fc1(x)))
+        x = F.relu(self.bn2(self.fc2(x)))
+        x = F.relu(self.bn3(self.fc3(x)))
+        x = F.relu(self.bn4(self.fc4(x)))
+        x = F.relu(self.bn5(self.fc5(x)))
+        x = F.relu(self.bn6(self.fc6(x)))
+        x = F.relu(self.bn7(self.fc7(x)))
+        x = self.dropout(self.fc(x))
         return x
-        # x = self.bn3(F.relu(self.fc3(x)))
-        # x = self.bn4(F.relu(self.fc4(x)))
-        # x = self.bn5(F.relu(self.fc5(x)))
-        # x = self.bn6(F.relu(self.fc6(x)))
-        # x = self.bn7(F.relu(self.fc7(x)))
-        # x = self.dropout(F.relu(self.fc8(x)))
-        # x = self.softmax(x)

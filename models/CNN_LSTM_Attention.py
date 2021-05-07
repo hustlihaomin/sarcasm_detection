@@ -54,10 +54,7 @@ class CNNLSTMAttentionModule(nn.Module):
         # hidden_last_out = torch.cat([hidden_last_L,hidden_last_R],dim=-1)
         #
         # out = self.dropout(hidden_last_out)
-        # out = F.relu(self.bn1(self.fc1(attn_output)))
-        # out = F.relu(self.bn2(self.fc2(out)))
-        # out = self.dropout(self.fc3(out))
-        out = F.relu(self.fc1(attn_output))
-        out = F.relu(self.fc2(out))
-        out = self.fc3(out)
+        out = F.relu(self.bn1(self.fc1(attn_output)))
+        out = F.relu(self.bn2(self.fc2(out)))
+        out = self.dropout(self.fc3(out))
         return out
