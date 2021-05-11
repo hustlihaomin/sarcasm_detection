@@ -32,6 +32,11 @@ class ConfigDNN:
                 'input_length': 229,  # TODO need to modify
                 'input_dimensions': 768
             },
+            'twitter': {
+                'data_path': os.path.join(self.data_path, 'twitter_with_emoji/twitter-with-emoji-feature.npy'),
+                'input_length': 128,  # TODO need to modify
+                'input_dimensions': 768
+            }
         }
 
     @staticmethod
@@ -70,6 +75,13 @@ class ConfigDNN:
                     'patience': 10,
                     'early_stop': 20,
                 },
+                'twitter': {
+                    'learning_rate': random.choice([5e-3, 1e-3, 1e-4]),
+                    'scheduler': ReduceLROnPlateau,
+                    'weight_decay': 1e-2,
+                    'patience': 10,
+                    'early_stop': 20,
+                }
             },
         }
 

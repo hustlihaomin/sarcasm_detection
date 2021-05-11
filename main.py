@@ -31,6 +31,7 @@ from train.cnnlstmattention import CNNLSTMAttentionTrain
 from train.cnnattention import CNNAttentionTrain
 
 
+
 def setup_seed():
     torch.manual_seed(1)
     torch.cuda.manual_seed_all(1)
@@ -42,15 +43,16 @@ def setup_seed():
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', type=bool, default=True)
-    parser.add_argument('--dataset', type=str, default='RQ')
-    parser.add_argument('--model_name', type=str, default='CNNAttention')
-    parser.add_argument('--num_workers', type=int, default=8)
+    parser.add_argument('--dataset', type=str, default='GEN')
+    parser.add_argument('--model_name', type=str, default='TextCNN')
+    parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--early_stop', type=bool, default=True)
     parser.add_argument('--shuffle', type=bool, default=True)
     parser.add_argument('--model_path', type=str, default='./model_path/')
     parser.add_argument('--log_path', type=str, default='./log_path/')
     parser.add_argument(
-        '--data_path', type=str, default='/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
+        '--data_path', type=str,
+        default='/home/data/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
     )
     parser.add_argument('--gpu_ids', type=list, default=[1])
     return parser.parse_args()
@@ -61,7 +63,7 @@ def init_model(params):
     print("Use %d GPUs!" % len(params.gpu_ids))
     params.devices = torch.device('cuda:%d' % params.gpu_ids[0] if using_cuda else 'cpu')
     dataloader = sarcasm_dataloader(params)
-    network = CNNAttentionModule(
+    network = TextCNNModule(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -73,7 +75,7 @@ def init_model(params):
             network, device_ids=params.gpu_ids, output_device=params.gpu_ids[0]
         )
 
-    train = CNNAttentionTrain(
+    train = TextCNNTrain(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -84,12 +86,13 @@ def init_model(params):
 
     if params.is_train:
         train.do_train(
-            dataloader, network.parameters(), params.scheduler,#params.scheduler
+            dataloader, network.parameters(), params.scheduler,  # params.scheduler
             params.learning_rate, params.weight_decay, params.patience
         )
     pretrained_path = os.path.join(params.model_path, f'{params.model_name}-{params.dataset}.pth')
     print(pretrained_path)
     assert os.path.exists(pretrained_path)
+    # temp_data = torch.load(pretrained_path)
     network.load_state_dict(torch.load(pretrained_path))
     network.to(device=params.devices)
     _, _, results = train.do_test(dataloader['test'], network)

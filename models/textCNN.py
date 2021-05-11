@@ -26,7 +26,9 @@ class TextCNNModule(nn.Module, ABC):
         # TODO 64 * 1 * 1 需要改成相对应的输出
         # for GEN, is 32 * 315
         # for HYP, is 32 * 386
-        self.fc1 = nn.Linear(32 * 386, 1024)
+        # for RQ, is 64 * 14 * 41
+        # for Twitter, is 32 * 60
+        self.fc1 = nn.Linear(32 * 60, 1024)
         self.fc2 = nn.Linear(1024, 512)
         self.fc3 = nn.Linear(512, 128)
         self.fc4 = nn.Linear(128, 2)
@@ -56,7 +58,7 @@ class TextCNNModule(nn.Module, ABC):
         x = torch.cat((x, x_4), dim=2)
 
         # TODO 64 * 1 * 1 需要改成相对应的输出
-        x = x.view(-1, 32 * 386)
+        x = x.view(-1, 32 * 60)
         # x = x.view(x.size(0), -1)
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn2(self.fc2(x)))
