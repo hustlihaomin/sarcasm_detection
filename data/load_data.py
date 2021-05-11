@@ -8,7 +8,7 @@ from transformers import BertTokenizer, BertModel
 
 from data.split import split_train_valid_test
 
-origin_path = "/home/data/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/"
+origin_path = "/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/"##118 /home/data/zhuriyong 222 /home/zhuriyong
 feature_file = {
     'GEN': origin_path + 'sarcasm_v2/GEN-sarc-notsarc-feature.csv',
     'HYP': origin_path + 'sarcasm_v2/HYP-sarc-notsarc-feature.csv',

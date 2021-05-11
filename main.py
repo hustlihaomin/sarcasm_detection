@@ -44,7 +44,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', type=bool, default=True)
     parser.add_argument('--dataset', type=str, default='GEN')
-    parser.add_argument('--model_name', type=str, default='TextCNN')
+    parser.add_argument('--model_name', type=str, default='DNN')
     parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--early_stop', type=bool, default=True)
     parser.add_argument('--shuffle', type=bool, default=True)
@@ -52,18 +52,17 @@ def parse_args():
     parser.add_argument('--log_path', type=str, default='./log_path/')
     parser.add_argument(
         '--data_path', type=str,
-        default='/home/data/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
-    )
+        default='/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
+    )#118 /home/data/zhuriyong 222 /home/zhuriyong load_data.py also change
     parser.add_argument('--gpu_ids', type=list, default=[1])
     return parser.parse_args()
-
 
 def init_model(params):
     using_cuda = len(params.gpu_ids) > 0 and torch.cuda.is_available()
     print("Use %d GPUs!" % len(params.gpu_ids))
     params.devices = torch.device('cuda:%d' % params.gpu_ids[0] if using_cuda else 'cpu')
     dataloader = sarcasm_dataloader(params)
-    network = TextCNNModule(
+    network = DNNModule(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -75,7 +74,7 @@ def init_model(params):
             network, device_ids=params.gpu_ids, output_device=params.gpu_ids[0]
         )
 
-    train = TextCNNTrain(
+    train = DNNTrain(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -108,7 +107,7 @@ def print_hi(name):
 if __name__ == '__main__':
     print_hi('PyCharm')
     setup_seed()
-    config = ConfigCNN(parse_args())
+    config = ConfigDNN(parse_args())
     init_model(config.get_config())
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
