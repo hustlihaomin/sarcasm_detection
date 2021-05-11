@@ -77,7 +77,7 @@ class ConfigCNN:
                 },
                 'twitter': {
                     'learning_rate': random.choice([5e-3, 1e-3, 1e-4]),
-                    'scheduler': 'ReduceLROnPlateau',
+                    'scheduler': ReduceLROnPlateau,
                     'weight_decay': 1e-2,
                     'patience': 10,
                     'early_stop': 20,

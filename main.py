@@ -26,6 +26,7 @@ from train.lstm import LSTMTrain
 from train.cnnlstm import CNNLSTMTrain
 from train.lstmattention import LSTMAttentionTrain
 
+
 def setup_seed():
     torch.manual_seed(1)
     torch.cuda.manual_seed_all(1)
@@ -37,15 +38,16 @@ def setup_seed():
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_train', type=bool, default=True)
-    parser.add_argument('--dataset', type=str, default='twitter')
-    parser.add_argument('--model_name', type=str, default='CNN')
-    parser.add_argument('--num_workers', type=int, default=8)
+    parser.add_argument('--dataset', type=str, default='GEN')
+    parser.add_argument('--model_name', type=str, default='TextCNN')
+    parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--early_stop', type=bool, default=True)
     parser.add_argument('--shuffle', type=bool, default=True)
     parser.add_argument('--model_path', type=str, default='./model_path/')
     parser.add_argument('--log_path', type=str, default='./log_path/')
     parser.add_argument(
-        '--data_path', type=str, default='/home/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
+        '--data_path', type=str,
+        default='/home/data/zhuriyong/Documents/JupyterProjects/SarcasmDetection/resource/dataset/'
     )
     parser.add_argument('--gpu_ids', type=list, default=[1])
     return parser.parse_args()
@@ -56,7 +58,7 @@ def init_model(params):
     print("Use %d GPUs!" % len(params.gpu_ids))
     params.devices = torch.device('cuda:%d' % params.gpu_ids[0] if using_cuda else 'cpu')
     dataloader = sarcasm_dataloader(params)
-    network = LSTMAttentionModule(
+    network = TextCNNModule(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -68,7 +70,7 @@ def init_model(params):
             network, device_ids=params.gpu_ids, output_device=params.gpu_ids[0]
         )
 
-    train = LSTMAttentionTrain(
+    train = TextCNNTrain(
         input_dimensions=params.input_dimensions,
         input_length=params.input_length,
         output_classes=params.output_classes,
@@ -79,12 +81,13 @@ def init_model(params):
 
     if params.is_train:
         train.do_train(
-            dataloader, network.parameters(), params.scheduler,#params.scheduler
+            dataloader, network.parameters(), params.scheduler,  # params.scheduler
             params.learning_rate, params.weight_decay, params.patience
         )
     pretrained_path = os.path.join(params.model_path, f'{params.model_name}-{params.dataset}.pth')
     print(pretrained_path)
     assert os.path.exists(pretrained_path)
+    # temp_data = torch.load(pretrained_path)
     network.load_state_dict(torch.load(pretrained_path))
     network.to(device=params.devices)
     _, _, results = train.do_test(dataloader['test'], network)
@@ -100,7 +103,7 @@ def print_hi(name):
 if __name__ == '__main__':
     print_hi('PyCharm')
     setup_seed()
-    config = ConfigLSTM(parse_args())
+    config = ConfigCNN(parse_args())
     init_model(config.get_config())
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -73,7 +73,6 @@ class Train:
         :return: 训练结果
         """
         optimizer = optim.Adam(parameters, lr=learning_rate, weight_decay=weight_decay)
-        #optimizer = optim.SGD(parameters,lr = 1e-4,weight_decay=weight_decay)
         if scheduler is not None:
             scheduler_step = scheduler(optimizer, mode='max', factor=0.1, verbose=True, patience=patience)
 
